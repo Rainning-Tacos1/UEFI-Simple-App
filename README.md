@@ -1,6 +1,6 @@
 `sudo apt install clang lld`
 
-`cmake -B build -S . && cmake --build build`
+`make build && make disk && make qemu`
 
 Ia32:
 `qemu-system-i386.exe -bios ovmf32.bin -hda disk.img`
