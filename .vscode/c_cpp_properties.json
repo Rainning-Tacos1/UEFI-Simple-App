@@ -1,0 +1,31 @@
+{
+    "configurations": [
+        {
+            "name": "UEFI-Clang",
+            "intelliSenseMode": "clang-x86",
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "includePath": [
+                "${workspaceFolder}/src",
+                "${workspaceFolder}/Include",
+                "${workspaceFolder}/Include/Ia32",
+                "${workspaceFolder}/Include/Protocol",
+                "${workspaceFolder}/Include/Guid",
+                "${workspaceFolder}/Include/IndustryStandard"
+            ],
+            "defines": [
+                "EFI_APPLICATION",
+                "_DEBUG"
+            ],
+            "browse": {
+                "path": [
+                    "${workspaceFolder}/src",
+                    "${workspaceFolder}/Include"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+            }
+        }
+    ],
+    "version": 4
+}
