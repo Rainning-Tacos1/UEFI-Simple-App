@@ -7,6 +7,7 @@ EFI_SYSTEM_TABLE* gST;
 EFI_BOOT_SERVICES* gBS;
 EFI_GUID gEfiGraphicsOutputProtocolGuid = EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID;
 
+
 // basicIO.c
 extern void ClearScreen(UINT32 bg);
 extern void SetTextBG(UINT32 color);
@@ -26,7 +27,7 @@ extern void halt(void);
 EFI_STATUS EFIAPI UefiMain(IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *SystemTable) {
 	gST = SystemTable; gImageHandle = ImageHandle; gBS = SystemTable->BootServices;
 	EFI_STATUS Status;
-
+	
 	// Basic IO
 	BasicIOInit();
 	
@@ -68,18 +69,29 @@ EFI_STATUS EFIAPI UefiMain(IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *Syste
 	}
 
 	halt();
-
-	
-	PrintInt(sizeof(void*));
-	PrintInt(sizeof(INTN));
-
-	halt();
 	Status = Gop->SetMode(Gop, 1);
+	//gST->ConOut->Reset(gST->ConOut, FALSE);
 	if(EFI_ERROR(Status)) exit(u"Could not set Gop mode\r\n");
 
-	EFI_PHYSICAL_ADDRESS base = Gop->Mode->FrameBufferBase;
 
+	EFI_GRAPHICS_OUTPUT_BLT_PIXEL buffer[100*100];
+	for (UINT32 i=0; i<100*100; i++) buffer[i].Red = (UINT8)0xff;
 
-	exit(u"End of program, no errors\r\n");
+	Status = Gop->Blt(
+		Gop,
+		buffer,
+		EfiBltBufferToVideo,
+		0, 0,                // source inside buffer
+		0, 0,            // destination on screen
+		100, 100,            // width × height
+		100                   // tightly packed
+	);
+
+	EFI_INPUT_KEY key;
+	while (gST->ConIn->ReadKeyStroke(gST->ConIn, &key) != EFI_SUCCESS);
+
+	// Shutdown, does not return
+	gST->RuntimeServices->ResetSystem(EfiResetShutdown, EFI_SUCCESS, 0, NULL);
+	//exit(u"End of program, no errors\r\n");
     return EFI_SUCCESS;
 }

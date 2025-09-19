@@ -2,7 +2,7 @@
 
 # Compiler
 CC := clang
-CFLAGS := -std=c17 -Wall -Wextra -Wpedantic -ffreestanding -fno-stack-protector -fshort-wchar -mno-red-zone
+CFLAGS := -std=c17 -Wall -Wextra -Wpedantic -ffreestanding -mno-stack-arg-probe -fno-stack-protector -fshort-wchar -mno-red-zone
 TARGET := i686-pc-win32 #x86_64-unknown-windows #i686-pc-win32
 
 # List of source files
