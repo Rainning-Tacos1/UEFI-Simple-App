@@ -70,47 +70,39 @@ EFI_STATUS EFIAPI UefiMain(IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *Syste
 		Print(u"\r\n");
 	}
 
+	EFI_PHYSICAL_ADDRESS Addr = 0;
+	UINTN Pages = EFI_SIZE_TO_PAGES(640 * 480 * 4); // macro rounds up to nearest page
+	Status = gBS->AllocatePages(
+		AllocateAnyPages,
+		EfiLoaderData,
+		Pages,
+		&Addr
+	);
+	if (EFI_ERROR(Status)) exit(u"Could not Allocate frame buffer!\r\n");
+
 	halt();
 	Status = Gop->SetMode(Gop, 1);
 	//gST->ConOut->Reset(gST->ConOut, FALSE);
 	if(EFI_ERROR(Status)) exit(u"Could not set Gop mode\r\n");
 
-	for(UINT32 y=0; y<480; ++y) {
-		for(UINT32 x=0; x<640; ++x) {
-			UINTN pixel_coord = 3 * (y * 640 + x);
-			EFI_GRAPHICS_OUTPUT_BLT_PIXEL pixel = {
-				.Red =   __src_67_bin[pixel_coord],
-				.Green = __src_67_bin[pixel_coord+1],
-				.Blue =  __src_67_bin[pixel_coord+2]
-			};
 
-			Status = Gop->Blt(
-				Gop,
-				&pixel,
-				EfiBltVideoFill,
-				0, 0,
-				x, y,
-				1, 1,
-				0
-			);
-			
-		}
+	EFI_GRAPHICS_OUTPUT_BLT_PIXEL *fb = (EFI_GRAPHICS_OUTPUT_BLT_PIXEL*)(UINTN)Addr;
+	for(int i=0; i<640*480; ++i) {
+		UINTN pix = 3 * i;
+		fb[i].Red = __src_67_bin[pix];
+		fb[i].Green = __src_67_bin[pix+1];
+		fb[i].Blue = __src_67_bin[pix+2];
 	}
 
-	/*
-	EFI_GRAPHICS_OUTPUT_BLT_PIXEL buffer[100*100];
-	for (UINT32 i=0; i<100*100; i++) buffer[i].Red = (UINT8)0xff;
-	
 	Status = Gop->Blt(
 		Gop,
-		buffer,
+		fb,
 		EfiBltBufferToVideo,
-		0, 0,                // source inside buffer
-		0, 0,            // destination on screen
-		100, 100,            // width × height
-		100                   // tightly packed
+		0, 0,
+		0, 0,
+		640, 480,
+		0
 	);
-	*/
 
 
 	EFI_INPUT_KEY key;
