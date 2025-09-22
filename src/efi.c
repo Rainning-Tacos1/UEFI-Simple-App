@@ -2,6 +2,8 @@
 #include <Library/UefiBootServicesTableLib.h>
 #include <Protocol/GraphicsOutput.h>
 
+#include "67.h"
+
 EFI_HANDLE gImageHandle;
 EFI_SYSTEM_TABLE* gST;
 EFI_BOOT_SERVICES* gBS;
@@ -73,10 +75,32 @@ EFI_STATUS EFIAPI UefiMain(IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *Syste
 	//gST->ConOut->Reset(gST->ConOut, FALSE);
 	if(EFI_ERROR(Status)) exit(u"Could not set Gop mode\r\n");
 
+	for(UINT32 y=0; y<480; ++y) {
+		for(UINT32 x=0; x<640; ++x) {
+			UINTN pixel_coord = 3 * (y * 640 + x);
+			EFI_GRAPHICS_OUTPUT_BLT_PIXEL pixel = {
+				.Red =   __src_67_bin[pixel_coord],
+				.Green = __src_67_bin[pixel_coord+1],
+				.Blue =  __src_67_bin[pixel_coord+2]
+			};
 
+			Status = Gop->Blt(
+				Gop,
+				&pixel,
+				EfiBltVideoFill,
+				0, 0,
+				x, y,
+				1, 1,
+				0
+			);
+			
+		}
+	}
+
+	/*
 	EFI_GRAPHICS_OUTPUT_BLT_PIXEL buffer[100*100];
 	for (UINT32 i=0; i<100*100; i++) buffer[i].Red = (UINT8)0xff;
-
+	
 	Status = Gop->Blt(
 		Gop,
 		buffer,
@@ -86,6 +110,8 @@ EFI_STATUS EFIAPI UefiMain(IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *Syste
 		100, 100,            // width × height
 		100                   // tightly packed
 	);
+	*/
+
 
 	EFI_INPUT_KEY key;
 	while (gST->ConIn->ReadKeyStroke(gST->ConIn, &key) != EFI_SUCCESS);
